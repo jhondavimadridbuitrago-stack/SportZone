@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Torneo Escolar - SportZone</title>
+    <link rel="stylesheet" href="estilo.css">
+    
+</head>
+<body>
+
+
+    <header>
+        <div style="position: absolute; top: 15px; right: 20px;">
+            <button id="theme-toggle" class="theme-btn" title="Cambiar tema">
+                <span id="theme-icon">🌙</span>
+            </button>
+        </div>
+        <img src="escudo y nombre.png" alt="" srcset="">
+        <h1> <img src="torneo.png" alt="" srcset="">SportZone <img src="torneo.png" alt=""></h1>
+        <h3>Portal de Torneos Escolares </h3>
+        <p>Gestión Deportiva Eficiente para Estudiantes y Profesores</p>
+    </header>
+
+    <nav id="main-nav">
+        <a onclick="showPage('inicio')" id="nav-inicio" class="active">Inicio</a>
+        <a onclick="showPage('inscripcion')" id="nav-inscripcion">Inscripción</a>
+        <a onclick="showPage('posiciones')" id="nav-posiciones">Tabla de Posiciones</a>
+        <a onclick="showPage('calendario')" id="nav-calendario">Calendario</a>
+        <a onclick="showPage('mapa')" id="nav-mapa">Mapa de Navegación</a>
+    </nav>
+
+    <div class="container">
+        
+        <div class="status-banner" id="role-banner">
+            <span>Configuración Actual: <span id="current-role-text">Invitado (Por favor selecciona una zona en Inicio)</span></span>
+            <button id="notif-btn" class="btn" style="display:none; margin-left:8px;" onclick="openPendingModal()">Notificaciones (<span id="notif-count">0</span>)</button>
+            <button class="btn btn-reset" onclick="logout()">Restablecer</button>
+        </div>
+        
+
+        <div id="page-inicio" class="page active-page">
+            <h2>Bienvenido al Portal Deportivo</h2>
+            <p>Selecciona tu zona correspondiente para interactuar con la plataforma de acuerdo a tus permisos.</p>
+            
+            <div class="zones-container">
+                <div class="zone-card student-card">
+                    <h3>Zona Estudiantil</h3>
+                    <p>Inscríbete en los torneos activos y visualiza las tablas de clasificación y los resultados en tiempo real.</p>
+                    <button class="btn" onclick="setRole('estudiante')">Ingresar como Estudiante</button>
+                </div>
+
+                <div class="zone-card teacher-card">
+                    <h3>Zona de Profesores</h3>
+                    <p>Área exclusiva para Docentes de Educación Física. Gestiona inscripciones y actualiza las tablas de posiciones de los partidos en tiempo real.</p>
+                    <button class="btn" onclick="openProfessorLogin()">Ingresar como Profesor</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-inscripcion" class="page">
+            <h2>Formulario de Inscripción de Equipos</h2>
+            <div id="inscripcion-content">
+                <form id="registration-form" onsubmit="registerTeam(event)">
+                    <div class="form-group">
+                        <label for="team-name">Nombre del Equipo o Grado:</label>
+                        <input type="text" id="team-name" required placeholder="Ej. 11° A - Los Cracks">
+                    </div>
+                    <div class="form-group">
+                        <label for="sport">Disciplina Deportiva:</label>
+                        <select id="sport" required>
+                            <option value="Futbol">Fútbol Sala</option>
+                            <option value="Baloncesto">Baloncesto</option>
+                            <option value="Voleibol">Voleibol</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="captain">Nombre del Capitán:</label>
+                        <input type="text" id="captain" required placeholder="Nombre del alumno representante">
+                    </div>
+                    <button type="submit" class="btn btn-success">Enviar Inscripción</button>
+                </form>
+                <div id="reg-message"></div>
+            </div>
+        </div>
+
+        <div id="page-posiciones" class="page">
+            <h2>Tabla de Posiciones en Tiempo Real</h2>
+            <p id="table-permission-msg"></p>
+            <div class="form-group" style="margin-bottom:10px;">
+                <label for="tournament-select">Seleccionar Torneo / Disciplina:</label>
+                <select id="tournament-select" onchange="onTournamentChange()">
+                    <option value="Futbol">Fútbol Sala</option>
+                    <option value="Baloncesto">Baloncesto</option>
+                    <option value="Voleibol">Voleibol</option>
+                </select>
+            </div>
+           
+            <!-- Fondo visual específico de Fútbol Sala (imágenes colocadas detrás del contenido) -->
+            <div id="futsal-bg" style="display:none;">
+                <img src="IMG-20260805-WA0009.jpg" alt="futsal-2" class="futsal-bg-img fg-2">
+                <img src="IMG-20260805-WA0001 (1).jpg" alt="futsal-3" class="futsal-bg-img fg-3">
+                <img src="IMG-20260805-WA0002 (1).jpg" alt="futsal-4" class="futsal-bg-img fg-4">
+                <img src="IMG-20260805-WA0004 (1).jpg" alt="futsal-5" class="futsal-bg-img fg-5">
+                <img src="IMG-20260805-WA0001.jpg" alt="futsal-1" class="futsal-bg-img fg-1">
+            </div>
+            
+            <button id="view-futsal-photos-btn" class="btn" style="display:none; margin-bottom:10px;">Ver fotos Fútbol Sala</button>
+
+            <div class="posiciones-inner">
+            <div style="overflow-x: auto;">
+                <table id="leaderboard">
+                    <thead>
+                        <tr>
+                            <th>Posición</th>
+                            <th>Equipo</th>
+                            <th>PJ (Partidos Jugados)</th>
+                            <th>PG (Ganados)</th>
+                            <th>PP (Perdidos)</th>
+                            <th>PTS (Puntos)</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                    </tbody>
+                </table>
+            </div>
+            <div id="add-scorer-box" style="margin-top:12px; display:none;">
+                <h4>Agregar Goleador</h4>
+                <form id="add-scorer-form" onsubmit="addTopScorer(event)">
+                    <input type="text" id="scorer-name" placeholder="Nombre jugador" required style="margin-right:8px;">
+                    <input type="text" id="scorer-team" placeholder="Equipo" required style="margin-right:8px;">
+                    <input type="number" id="scorer-goals" placeholder="Goles" min="0" required style="width:80px; margin-right:8px;">
+                    <button class="btn btn-success" type="submit">Agregar</button>
+                </form>
+            </div>
+            <button id="save-table-btn" class="btn btn-success" style="display:none; margin-top:20px;" onclick="saveLeaderboard()">Guardar Cambios de la Tabla</button>
+
+            <h3 style="margin-top:24px;">Tabla de Goleadores (Top Scorers)</h3>
+            <div style="overflow-x:auto;">
+                <table id="top-scorers" style="width:100%; margin-top:8px;">
+                    <thead>
+                        <tr>
+                            <th>Pos</th>
+                            <th>Jugador</th>
+                            <th>Equipo</th>
+                            <th>Goles</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="top-scorers-body"></tbody>
+                </table>
+            </div>
+            </div>
+        </div>
+
+        <div id="page-calendario" class="page">
+            <h2>Calendario de Encuentros</h2>
+            <p>Programación de partidos para todos los miembros de la comunidad escolar.</p>
+            <br>
+            <div class="calendar-actions">
+                <h3>Agregar próximo partido</h3>
+                <form id="add-match-form" class="match-form" onsubmit="addUpcomingMatch(event)">
+                    <input type="hidden" id="match-index" value="">
+                    <input type="text" id="match-home" placeholder="Equipo Local" required>
+                    <input type="text" id="match-away" placeholder="Equipo Visitante" required>
+                    <select id="match-sport" required>
+                        <option value="Fútbol Sala">Fútbol Sala</option>
+                        <option value="Baloncesto">Baloncesto</option>
+                        <option value="Voleibol">Voleibol</option>
+                    </select>
+                    <select id="match-phase" required>
+                        <option value="Fase de Grupos">Fase de Grupos</option>
+                        <option value="Octavos">Octavos</option>
+                        <option value="Cuartos">Cuartos</option>
+                        <option value="Semifinal">Semifinal</option>
+                        <option value="Final">Final</option>
+                        <option value="Amistoso">Amistoso</option>
+                    </select>
+                    <input type="date" id="match-date" required>
+                    <input type="time" id="match-time" required>
+                    <input type="text" id="match-result" placeholder="Resultado (ej. 3 - 1)" maxlength="20">
+                    <div class="form-group compact-form-group">
+                        <label for="match-mvp">MVP del partido:</label>
+                        <input type="text" id="match-mvp" placeholder="Ej. Mateo Silva" maxlength="50">
+                    </div>
+                    <div class="match-form-actions">
+                        <button class="btn btn-success" type="submit" id="match-submit-btn">Agregar Partido</button>
+                        <button class="btn btn-secondary" type="button" id="match-cancel-btn" onclick="cancelMatchEdit()" style="display:none;">Cancelar</button>
+                    </div>
+                </form>
+                <button id="calendar-save-btn" class="btn btn-success" type="button" onclick="saveCalendarChanges()" style="margin-top:12px;">Guardar Cambios</button>
+            </div>
+            <div id="calendar-grid" class="calendar-grid"></div>
+
+            <div id="played-matches-section" style="margin-top:32px;">
+                <h3>Partidos ya jugados</h3>
+                <div id="played-matches-grid" class="calendar-grid"></div>
+            </div>
+        </div>
+
+        <div id="page-mapa" class="page">
+            <h2>Mapa de Navegación y Arquitectura del Sitio</h2>
+            <p>A continuación se detalla la estructura lógica implementada en este prototipo interactivo y cómo interactúan los diferentes roles con el sistema:</p>
+            
+            <div class="map-box">
+                <h3>🗺️ Mapa del portal SportZone</h3>
+                <ul>
+                    <li class="map-node"><strong>Inicio</strong>
+                        <ul>
+                            <li class="map-node">Pantalla principal con dos accesos: <em>Zona Estudiantil</em> y <em>Zona de Profesores</em>.</li>
+                            <li class="map-node">El botón de cambio de tema permite alternar entre modo claro y oscuro.</li>
+                            <li class="map-node">El banner de estado muestra el rol activo: invitado, estudiante o profesor.</li>
+                        </ul>
+                    </li>
+
+                    <li class="map-node"><strong>Inscripción</strong>
+                        <ul>
+                            <li class="map-node">Se registran equipos con nombre, disciplina y capitán.</li>
+                            <li class="map-node">La solicitud queda en espera para revisión del profesor.</li>
+                            <li class="map-node">El docente puede aceptar o rechazar cada inscripción desde el panel de notificaciones.</li>
+                        </ul>
+                    </li>
+
+                    <li class="map-node"><strong>Tabla de Posiciones</strong>
+                        <ul>
+                            <li class="map-node">Se puede elegir la disciplina: Fútbol Sala, Baloncesto o Voleibol.</li>
+                            <li class="map-node">Los estudiantes solo visualizan la información y no pueden editar.</li>
+                            <li class="map-node">Los profesores pueden modificar partidos jugados, victorias, derrotas y puntos.</li>
+                            <li class="map-node">El sistema recalcula automáticamente la clasificación y reordena la tabla.</li>
+                            <li class="map-node">Existe la opción de eliminar equipos y guardar cambios.</li>
+                        </ul>
+                    </li>
+
+                    <li class="map-node"><strong>Goleadores</strong>
+                        <ul>
+                            <li class="map-node">Se muestra el top de anotadores por disciplina.</li>
+                            <li class="map-node">El profesor puede agregar o quitar jugadores desde el formulario.</li>
+                            <li class="map-node">La lista se ordena automáticamente por cantidad de goles.</li>
+                        </ul>
+                    </li>
+
+                    <li class="map-node"><strong>Calendario</strong>
+                        <ul>
+                            <li class="map-node">Se muestran los partidos próximos según la disciplina seleccionada.</li>
+                            <li class="map-node">El profesor puede crear, editar y eliminar encuentros.</li>
+                            <li class="map-node">Cada partido incluye fecha, hora, fase, resultado y MVP.</li>
+                            <li class="map-node">También existe una sección de <em>Partidos ya jugados</em> con el historial del torneo.</li>
+                            <li class="map-node">Desde ahí se puede marcar un partido como jugado o devolverlo a próximos si hubo un error.</li>
+                        </ul>
+                    </li>
+
+                    
+
+                    <li class="map-node"><strong>Galería de Fútbol Sala</strong>
+                        <ul>
+                            <li class="map-node">Se activa desde la tabla de posiciones cuando la disciplina seleccionada es Fútbol Sala.</li>
+                            <li class="map-node">Abre un modal con imágenes del torneo.</li>
+                        </ul>
+                    </li>
+
+                    <li class="map-node"><strong>Restablecer / cerrar sesión</strong>
+                        <ul>
+                            <li class="map-node">Vuelve al estado inicial del sitio y limpia la sesión activa.</li>
+                            <li class="map-node">El rol invitado vuelve a tomar el control de navegación.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Panel de control / Modal de ingreso para profesores -->
+    <div id="prof-login-modal" style="display:none; position:fixed; inset:0; align-items:center; justify-content:center; background:rgba(0,0,0,0.5);" class="modal-overlay">
+        <div class="modal-content" style="padding:20px; width:320px; margin:auto;">
+            <h3>Panel de Control - Acceso Profesor</h3>
+            <p>Ingrese el usuario administrador y su contraseña de profesor.</p>
+            <form id="prof-login-form" onsubmit="handleProfessorLogin(event)">
+                <div style="margin-bottom:8px;">
+                    <label>Usuario Admin:</label>
+                    <input type="text" id="admin-user" required style="width:100%;">
+                </div>
+                <div style="margin-bottom:8px;">
+                    <label>Contraseña Profesor:</label>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <input type="password" id="prof-password" required style="width:100%;">
+                        
+                    </div>
+                </div>
+                <div style="display:flex; gap:8px; justify-content:flex-end;">
+                    <button type="button" class="btn" onclick="closeProfessorLogin()">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Ingresar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de inscripciones pendientes -->
+    <div id="pending-modal" style="display:none; position:fixed; inset:0; align-items:center; justify-content:center; background:rgba(0,0,0,0.6);" class="modal-overlay">
+        <div class="modal-content" style="padding:20px; width:480px; margin:auto;">
+            <h3>Inscripciones Pendientes</h3>
+            <div id="pending-list" style="max-height:300px; overflow:auto; margin-bottom:12px;"></div>
+            <div style="display:flex; justify-content:flex-end; gap:8px;">
+                <button class="btn" onclick="closePendingModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Galería de Fútbol Sala -->
+    <div id="gallery-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:2000;">
+        <div style="position:relative; max-width:960px; width:95%;">
+            <button class="btn" onclick="closeGalleryModal()" style="position:absolute; right:8px; top:8px; z-index:2010;">Cerrar</button>
+            <div class="modal-content" style="padding:12px; text-align:center; overflow:auto; max-height:90vh;">
+                <h3>Galería - Fútbol Sala</h3>
+                <div id="gallery-images" style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+                    <!-- imágenes llenadas desde el HTML estático -->
+                    <img src="IMG-20260805-WA0009.jpg" style="max-width:30%; border-radius:6px;" />
+                    <img src="IMG-20260805-WA0001 (1).jpg" style="max-width:30%; border-radius:6px;" />
+                    <img src="IMG-20260805-WA0002 (1).jpg" style="max-width:30%; border-radius:6px;" />
+                    <img src="IMG-20260805-WA0004 (1).jpg" style="max-width:30%; border-radius:6px;" />
+                    <img src="IMG-20260805-WA0001.jpg" style="max-width:30%; border-radius:6px;" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="scrip.js"></script>
+</body>
+</html>
